@@ -11,6 +11,7 @@ import {
     ContractTransaction,
     Utils,
     prop,
+    StatefulNext,
 } from 'scrypt-ts'
 import { Address, Script, Transaction } from 'bsv'
 
@@ -43,8 +44,8 @@ export class Foo extends SmartContract {
         console.log('panduan :', panduan)
         assert(!panduan, 'cant use')
 
-        const output: ByteString = this.buildStateOutput(BigInt(Foo.SATOSHIS))
         this.preOutputIndex = this.ctx.utxo.outpoint.outputIndex
+        const output: ByteString = this.buildStateOutput(BigInt(Foo.SATOSHIS))
 
         let outputs: ByteString = toByteString('')
         for (let i = 0; i < Foo.OUTPUTS_COUNT; i++) {
@@ -79,11 +80,7 @@ export class Foo extends SmartContract {
             current.buildContractInput(options.fromUTXO)
         )
 
-        const nextOutputs = new Array(38).fill(1).map((_, i) => ({
-            instance: current.next(),
-            atOutputIndex: i,
-            balance: 1,
-        }))
+        const nextOutputs = options.next as StatefulNext<Foo>[]
 
         nextOutputs.forEach((n) => {
             unsignedTx.addOutput(

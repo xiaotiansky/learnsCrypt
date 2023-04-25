@@ -2,6 +2,19 @@ import { Foo } from '../../src/contracts/foo'
 import { getDefaultSigner, sleep } from './util/txHelper'
 import { MethodCallOptions } from 'scrypt-ts'
 
+function createNextOutputs(current: Foo, preOutputIndex: bigint) {
+    const nextOutputs = new Array(38).fill(1).map((_, i) => {
+        const next = current.next() //update state
+        next.preOutputIndex = preOutputIndex
+        return {
+            instance: next,
+            atOutputIndex: i,
+            balance: 1,
+        }
+    })
+    return nextOutputs
+}
+
 async function main() {
     await Foo.compile()
 
@@ -21,7 +34,9 @@ async function main() {
         tx: callTx_1,
         nexts: nexts1,
         atInputIndex: atInputIndex1,
-    } = await foo.methods.process()
+    } = await foo.methods.process({
+        next: createNextOutputs(foo, 0n),
+    })
     console.log('atInputIndex1 = ', atInputIndex1)
     console.log('Foo call tx 1= ', callTx_1.id)
     await sleep(5)
@@ -32,18 +47,21 @@ async function main() {
         tx: callTx_2,
         nexts: nexts2,
         atInputIndex: atInputIndex2,
-    } = await nexts1[37].instance.methods.process()
+    } = await nexts1[37].instance.methods.process({
+        next: createNextOutputs(nexts1[37].instance, 37n),
+    })
 
     console.log('atInputIndex2 = ', atInputIndex2)
     await sleep(5)
     console.log('Foo call tx 2: ', callTx_2.id, ', count updated to: ')
 
-    nexts2[5].instance.preOutputIndex = BigInt(37)
     const {
         tx: callTx_3,
         nexts: nexts3,
         atInputIndex: atInputIndex3,
-    } = await nexts2[5].instance.methods.process()
+    } = await nexts2[5].instance.methods.process({
+        next: createNextOutputs(nexts2[5].instance, 5n),
+    })
 
     console.log('atInputIndex3 = ', atInputIndex3)
     await sleep(5)
@@ -54,7 +72,9 @@ async function main() {
         tx: callTx_4,
         nexts: nexts4,
         atInputIndex: atInputIndex4,
-    } = await nexts3[37].instance.methods.process()
+    } = await nexts3[37].instance.methods.process({
+        next: createNextOutputs(nexts3[37].instance, 37n),
+    })
     await sleep(5)
     console.log('atInputIndex4 = ', atInputIndex4)
     console.log('Foo call tx 4: ', callTx_4.id, ', count updated to: ')
@@ -64,7 +84,10 @@ async function main() {
         tx: callTx_5,
         nexts: nexts5,
         atInputIndex: atInputIndex5,
-    } = await nexts4[37].instance.methods.process()
+    } = await nexts4[37].instance.methods.process({
+        next: createNextOutputs(nexts3[37].instance, 37n),
+    })
+
     await sleep(5)
     console.log('atInputIndex5 = ', atInputIndex4)
     console.log('Foo call tx 5: ', callTx_5.id, ', count updated to: ')
@@ -74,7 +97,9 @@ async function main() {
         tx: callTx_6,
         nexts: nexts6,
         atInputIndex: atInputIndex6,
-    } = await nexts5[37].instance.methods.process()
+    } = await nexts5[37].instance.methods.process({
+        next: createNextOutputs(nexts5[37].instance, 37n),
+    })
     await sleep(5)
     console.log('atInputIndex6 = ', atInputIndex4)
     console.log('Foo call tx 6: ', callTx_6.id, ', count updated to: ')
