@@ -37,12 +37,15 @@ export class Foo extends SmartContract {
         console.log('test 1', this.preOutputIndex == BigInt(37n))
         console.log('test 2', this.ctx.utxo.outpoint.outputIndex == BigInt(37n))
 
-        const panduan: boolean =
+        const isTerminate: boolean =
             this.preOutputIndex == BigInt(37n) &&
             this.ctx.utxo.outpoint.outputIndex == BigInt(37n)
 
-        console.log('panduan :', panduan)
-        assert(!panduan, 'cant use')
+        console.log('isTerminate :')
+        assert(
+            !isTerminate,
+            'No new characters can be created after two consecutive (-) characters'
+        )
 
         this.preOutputIndex = this.ctx.utxo.outpoint.outputIndex
         const output: ByteString = this.buildStateOutput(BigInt(Foo.SATOSHIS))
