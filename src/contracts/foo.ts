@@ -29,19 +29,11 @@ export class Foo extends SmartContract {
 
     @method(SigHash.ALL)
     public process() {
-        console.log('this.preOutputIndex = ', this.preOutputIndex)
-        console.log(
-            'this.ctx.utxo.outpoint.outputIndex = ',
-            this.ctx.utxo.outpoint.outputIndex
-        )
-        console.log('test 1', this.preOutputIndex == BigInt(37n))
-        console.log('test 2', this.ctx.utxo.outpoint.outputIndex == BigInt(37n))
-
         const isTerminate: boolean =
             this.preOutputIndex == BigInt(37n) &&
             this.ctx.utxo.outpoint.outputIndex == BigInt(37n)
 
-        console.log('isTerminate :')
+        console.log(`isTerminate :${isTerminate}`)
         assert(
             !isTerminate,
             'No new characters can be created after two consecutive (-) characters'
